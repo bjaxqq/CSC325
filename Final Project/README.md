@@ -26,6 +26,10 @@ This project has three milestones:
 2. Propose a design for your dashboard visual
 3. Create a database schema for your dataset, normalize the database, and create a relational schema
 
+**Milestone 2 (due Nov 12th):** Write a python code to retrieve and bulk load the data in the database  
+
+**Milestone 3 (due Dec 5th):** Implementing the dashboard and present your project in class
+
 ## Datasets
 
 Here are some sources of data and criteria for an acceptable dataset:  
@@ -40,3 +44,4 @@ An acceptable dataset must:
 - [jdorfman's GitHub](https://www.github.com/jdofrman/awesome-json-datasets)
 - [Kaggle](https://www.kaggle.com)
 - [RapidAPI](https://www.rapidapi.com)
+
