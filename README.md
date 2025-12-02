@@ -2,7 +2,7 @@
 
 ## Course Description
 
-Students are introduced to operating systems and the software to support these systems. Topics include operating system principles, concurrency, scheduling and dispatch, virtual memory, device management, security and protection, file systems and naming, and real-time systems.
+Students are introduced to the theory and application of database systems. Topics include data modeling and the relational model, query languages, relational database design, transaction processing, databases and physical database design.
 
 ## Tools Used
 
