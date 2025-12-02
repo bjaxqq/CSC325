@@ -1,47 +1,81 @@
-# Final Project
+# Pokédex Database and Visualization Dashboard
 
-## Introduction
+This project normalizes First-Generation Pokédex JSON dataset and visualizes key metrics using a Dash application connected to an AWS RDS MySQL instance.
 
-**The term project reflects 20% of your final grade.**  
+## Project Summary
 
-**This is a group project.**  
+| Component | Description | Technologies |
+| :--: | :--: | :--: |
+| **Data Source** | Public Pokémon Go Pokedex JSON dataset (151 Pokémon) | JSON |
+| **Database** | Fully normalized, 8-table relational schema hosted on AWS RDS | MySQL, AWS RDS |
+| **Ingestion Script** | Python script to create the schema, parse JSON, and populate all tables while enforcing referential integrity | Python (pymysql, json) |
+| **Visualization** | Interactive dashboard providing dynamic access to Pokémon data | Python (Dash, Plotly, pandas, SQLAlchemy) |
 
-This document provides a basic skeleton for the project. Specific details regarding expected deliverables will be posted on Blackboard as separate assignments.
+## Database Normalization and Schema
 
-## Learning Objectives
+The original nested JSON data was normalized up to Third Normal Form (3NF) to ensure data integrity and avoid redundancy.  
 
-- Creating a relational schema for given data
-- Bulk load data using python
-- Build a dashboard that displays data visualizations
+The final schema consists of 8 tables enforcing complex many-to-many relationships, as illustrated in the presentation:
 
-## Overview
+- Core Tables: Pokemon, Candy, Egg, Type, Weakness, Evolution
+- Junction Tables: PokemonType, PokemonWeakness
 
-In this project you will create a relational schema and a MySQL database for a dataset of your choice. You will also implement/create a dashboard that displays five different visualizations of your dataset using a Jupyter notebook (see [example](https://www.kaggle.com/benhammer/python-data-visualizations)).  
+### Schema Highlight (Evolution Fix)
 
-This project has three milestones:  
+The Evolution table was specifically designed with the final visualization in mind and includes a cost column to store the required candy count to trigger the evolution, fulfilling the Key Performance Indicator (KPI) requirement:
 
-**Milestone 1 (due Oct 26th):** Write a proposal to  
+```sql
+CREATE TABLE Evolution (
+    evolution_id INT AUTO_INCREMENT,
+    from_pokemon_id INT NOT NULL,
+    to_pokemon_id INT NOT NULL,
+    cost INT NULL,
+    PRIMARY KEY (evolution_id),
+    FOREIGN KEY (from_pokemon_id) REFERENCES Pokemon(pokemon_id),
+    FOREIGN KEY (to_pokemon_id) REFERENCES Pokemon(pokemon_id)
+);
+```
 
-1. Identify your dataset
-2. Propose a design for your dashboard visual
-3. Create a database schema for your dataset, normalize the database, and create a relational schema
+## Dashboard Visualization
 
-**Milestone 2 (due Nov 12th):** Write a python code to retrieve and bulk load the data in the database  
+The Python/Dash application presents 5 interactive components that update dynamically based on the selected Pokémon:  
 
-**Milestone 3 (due Dec 5th):** Implementing the dashboard and present your project in class
+1. Profile Card: Displays the Pokémon image, name, and Pokédex number
+2. Key Stats (KPIs): Shows atomic numerical data (Height, Weight, Egg Distance, Evolution Candy Cost)  
+3. Type Composition (Pie Chart): Visualizes the Pokémon's type(s)  
+4. Type Distribution (Bar Chart): Displays the total count of Pokémon for each type in the database  
+5. Evolution Path (Flow Chart): Shows the full evolutionary chain from the root form through all intermediate stages, complete with images and arrows  
 
-## Datasets
+## Setup and Execution
 
-Here are some sources of data and criteria for an acceptable dataset:  
+To run the full project:
 
-An acceptable dataset must:
+### Database Setup
 
-1. Yield at least five different tables
-2. The data is connected such that there is only one or two standalone tables
+1. Open `milestone2-pokedex-database.py`
+2. Fill in the host, user, and password fields in the get_connection() function to point to your AWS RDS MySQL instance
+3. Run `python milestone2-pokedex-database.py` to create the pokedex_db, set up all 8 tables, and populate them with the parsed data from pokedex.json, including all KPI and cost data
 
-### Data sources:
+### Dashboard Launch
 
-- [jdorfman's GitHub](https://www.github.com/jdofrman/awesome-json-datasets)
-- [Kaggle](https://www.kaggle.com)
-- [RapidAPI](https://www.rapidapi.com)
+1. Make sure all Python libraries are installed using our `requirements.txt` file:
 
+```bash
+pip install -r requirements.txt
+```
+
+2. Run the main dashboard script:
+
+```bash
+python milestone3-pokedex-dashboard.py
+```
+
+3. Access the dashboard in your web browser at http://127.0.0.1:8050/
+
+## Contributions
+
+This final project was created by:
+
+[Shawn Acheampong (shawnachie)](https://github.com/shawnachie)  
+[Brooks Jackson (bjaxqq)](https://github.com/bjaxqq)  
+[Eric May (ericmay33)](https://github.com/ericmay33)

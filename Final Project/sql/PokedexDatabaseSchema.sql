@@ -1,4 +1,12 @@
-
+-- DROP ALL TABLES
+-- DROP TABLE IF EXISTS PokemonWeakness;
+-- DROP TABLE IF EXISTS PokemonType;
+-- DROP TABLE IF EXISTS Evolution;
+-- DROP TABLE IF EXISTS Weakness;
+-- DROP TABLE IF EXISTS Type;
+-- DROP TABLE IF EXISTS Pokemon;
+-- DROP TABLE IF EXISTS Candy;
+-- DROP TABLE IF EXISTS Egg;
 
 CREATE TABLE Candy (
     candy_id INT AUTO_INCREMENT,
@@ -58,10 +66,12 @@ CREATE TABLE PokemonWeakness (
     FOREIGN KEY (weakness_id) REFERENCES Weakness(weakness_id)
 );
 
+-- FIX: Added 'cost' column to store candy required for this evolution link
 CREATE TABLE Evolution (
     evolution_id INT AUTO_INCREMENT,
     from_pokemon_id INT NOT NULL,
     to_pokemon_id INT NOT NULL,
+    cost INT NULL,
     PRIMARY KEY (evolution_id),
     FOREIGN KEY (from_pokemon_id) REFERENCES Pokemon(pokemon_id),
     FOREIGN KEY (to_pokemon_id) REFERENCES Pokemon(pokemon_id)

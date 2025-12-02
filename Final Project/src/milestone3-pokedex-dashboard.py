@@ -15,6 +15,7 @@ DB_NAME = "pokedex_db"
 class PokedexDataFetcher:
     def __init__(self):
         self.engine = None
+
         try:
             host = os.environ.get("DB_HOST", DB_HOST)
             user = os.environ.get("DB_USER", DB_USER)
@@ -26,10 +27,11 @@ class PokedexDataFetcher:
             
             with self.engine.begin() as conn:
                 conn.execute(text("SELECT 1"))
-            print("✅ Database connection successful.")
+
+            print("Database connection successful.")
             
         except Exception as e:
-            print(f"❌ Database connection failed: {e}")
+            print(f"Database connection failed: {e}")
             self.engine = None
 
     def execute_query(self, sql, params=None):
@@ -38,7 +40,7 @@ class PokedexDataFetcher:
         try:
             return pd.read_sql(text(sql), self.engine, params=params)
         except Exception as e:
-            print(f"❌ Database query error: {e}")
+            print(f"Database query error: {e}")
             return pd.DataFrame()
 
     def fetch_all_pokemon_names(self):
@@ -50,8 +52,8 @@ class PokedexDataFetcher:
         chain = deque()
         seen_names = set()
         root_name = start_name
-        
         current_name = start_name
+
         while True:
             params = {'p_name': current_name}
             sql_prev = """
@@ -75,11 +77,13 @@ class PokedexDataFetcher:
 
         while queue:
             name = queue.popleft()
+            
             if name in name_set:
                 continue
-            name_set.add(name)
 
+            name_set.add(name)
             data = self.fetch_pokemon_data(name)
+
             if data:
                 chain_list.append({
                     'name': data['name'], 
@@ -89,6 +93,7 @@ class PokedexDataFetcher:
                 })
                 
                 params = {'p_name': data['name']}
+
                 sql_next = """
                     SELECT next_poke.name AS next_evolution_name
                     FROM Pokemon current_poke
@@ -96,7 +101,9 @@ class PokedexDataFetcher:
                     JOIN Pokemon next_poke ON e.to_pokemon_id = next_poke.pokemon_id
                     WHERE current_poke.name = :p_name
                 """
+
                 df_next = self.execute_query(sql_next, params)
+
                 for index, row in df_next.iterrows():
                     queue.append(row['next_evolution_name'])
 
@@ -119,18 +126,21 @@ class PokedexDataFetcher:
             FROM Pokemon p 
             WHERE p.name = :p_name
         """
+
         sql_types = """
             SELECT t.type_name
             FROM Pokemon p JOIN PokemonType pt ON p.pokemon_id = pt.pokemon_id
             JOIN Type t ON pt.type_id = t.type_id
             WHERE p.name = :p_name
         """
+
         sql_weaknesses = """
             SELECT w.weakness_name
             FROM Pokemon p JOIN PokemonWeakness pw ON p.pokemon_id = pw.pokemon_id
             JOIN Weakness w ON pw.weakness_id = w.weakness_id
             WHERE p.name = :p_name
         """
+
         sql_type_counts = """
             SELECT 
                 t.type_name,
@@ -140,6 +150,7 @@ class PokedexDataFetcher:
             GROUP BY t.type_name
             ORDER BY type_count DESC
         """
+
         sql_candy_cost = """
             SELECT COALESCE(e.cost, 'N/A') AS evolution_cost
             FROM Pokemon p
@@ -149,7 +160,9 @@ class PokedexDataFetcher:
         """
 
         df_core_kpi = self.execute_query(sql_core_kpi, params)
+
         if df_core_kpi.empty: return None
+
         core_data = df_core_kpi.iloc[0].to_dict()
 
         types = self.execute_query(sql_types, params)['type_name'].tolist()
@@ -189,6 +202,7 @@ def create_evolution_flow_elements(data_fetcher, current_name):
 
     for i, item in enumerate(chain):
         elements.append(evo_box(item))
+
         if i < len(chain) - 1:
             elements.append(html.Div(className='evo-arrow'))
 
@@ -219,7 +233,6 @@ TYPE_COLORS = {
 
 app.layout = html.Div(
     children=[
-        
         html.Div([
             html.H1("Pokédex Database Visualization", style={'textAlign': 'center', 'margin': '10px 0', 'color': POKEDEX_COLORS['card_bg']}),
             dcc.Dropdown(
@@ -333,6 +346,7 @@ def update_dashboard(selected_name):
         color='Type',
         color_discrete_map={t: TYPE_COLORS.get(t.upper(), '#6C7A89') for t in data['types']}
     )
+
     pie_fig.update_layout(
         margin={"r":0,"t":0,"l":0,"b":0}, 
         showlegend=True, 
@@ -514,6 +528,6 @@ app.index_string = '''
 
 if __name__ == '__main__':
     print("\nRunning Dash application...")
-    print("Access the dashboard in your browser at: http://127.0.0.1:8050/")
+    print("Access the dashboard at: http://127.0.0.1:8050/")
     
     app.run(debug=True)
